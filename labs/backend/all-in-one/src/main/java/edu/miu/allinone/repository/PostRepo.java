@@ -1,16 +1,11 @@
 package edu.miu.allinone.repository;
 
 import edu.miu.allinone.entity.Post;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface PostRepo {
+public interface PostRepo extends JpaRepository<Post, Long>{
 
-    public void save(Post post);
-    public List<Post> findAll();
-    public Post getById(long id);
-    public Post deleteById(long id);
-    public Post update(Post updatedPost);
-
-    public List<Post> findByAuthor(String author);
+    public List<Post> findAllByAuthor(String author);
 }

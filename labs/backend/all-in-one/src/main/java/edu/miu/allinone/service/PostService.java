@@ -10,7 +10,7 @@ public interface PostService {
     public void save(Post post);
     public List<PostDto> findAll();
     public PostDto getById(long id);
-    public PostDto deleteById(long id);
+    public void deleteById(long id);
     public Post update(Post updatedPost);
     public List<PostDto> findByAuthor(String author);
 }

@@ -1,8 +1,12 @@
 package edu.miu.allinone.controller;
 
+import edu.miu.allinone.aspect.annotation.ExecutionTime;
 import edu.miu.allinone.dto.output.PostDto;
+import edu.miu.allinone.entity.Comment;
 import edu.miu.allinone.entity.Post;
 import edu.miu.allinone.service.PostService;
+import jakarta.persistence.EntityNotFoundException;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,14 +18,13 @@ import java.util.List;
 @RequestMapping("api/v1/posts")
 public class PostController {
 
-
+    @Autowired
     PostService postService;
 
     @Autowired
-    public void setPostService(PostService postService) {
-        this.postService = postService;
-    }
+    ModelMapper modelMapper;
 
+    @ExecutionTime
     @GetMapping
     public List<PostDto> findAll() {
         return postService.findAll();
@@ -49,8 +52,8 @@ public class PostController {
 
     @ResponseStatus(HttpStatus.ACCEPTED)
     @DeleteMapping("{id}")
-    public PostDto delete(@PathVariable("id") long id) {
-        return postService.deleteById(id);
+    public void delete(@PathVariable("id") long id) {
+        postService.deleteById(id);
     }
 
     @PutMapping("{id}")
@@ -64,5 +67,20 @@ public class PostController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
+    @ResponseStatus(HttpStatus.CREATED)
+    @PostMapping("{id}/comments")
+    public void addCommentToPost(@PathVariable("id") int id, @RequestBody Comment comment) {
+        PostDto postDto = postService.getById(id);
+        if (postDto == null) {
+            throw new EntityNotFoundException("Post not found with ID: " + id);
+        }
+
+        Post post = modelMapper.map(postDto, Post.class);
+        comment.setPost(post);
+        post.getComments().add(comment);
+        postService.save(post);
+    }
+
 
 }
